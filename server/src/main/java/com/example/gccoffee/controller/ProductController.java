@@ -19,4 +19,19 @@ public class ProductController {
         model.addAttribute("products", products);
         return "product-list";
     }
+
+    @GetMapping("new-product")
+    public String newProductPage() {
+        return "new-product";
+    }
+
+    @PostMapping("/products")
+    public String newProduct(CreateProductRequest createProductRequest) {
+        productService.createProduct(
+                createProductRequest.productName(),
+                createProductRequest.category(),
+                createProductRequest.price(),
+                createProductRequest.description());
+        return "redirect:/products";
+    }
 }
