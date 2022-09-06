@@ -9,34 +9,36 @@ function App() {
   // 상태에 접근할 수 있는 변수명, 상태값 바꾸는 함수
   const [products, setProducts] = useState([
     {
-      id: "uuid-1",
+      productId: "uuid-1",
       productName: "콜롬비아커피1",
       category: "커피빈",
       price: 3000,
     },
     {
-      id: "uuid-2",
+      productId: "uuid-2",
       productName: "콜롬비아커피2",
       category: "커피빈",
       price: 3000,
     },
     {
-      id: "uuid-3",
+      productId: "uuid-3",
       productName: "콜롬비아커피3",
       category: "커피빈",
       price: 3000,
     },
   ]); //기본상태
   const [items, setItems] = useState([]);
-  const handleAddClicked = (id) => {
+  const handleAddClicked = (productId) => {
     //같은 아이디 찾기
-    const product = products.find((v) => v.id === id);
-    const found = items.find((v) => v.id === id);
+    const product = products.find((v) => v.productId === productId);
+    const found = items.find((v) => v.productIdid === productId);
     const updatedItems =
       //상품확인...모든속성 복사, 개수 +1/없으면 기존 아이템 반환
       //기존것 복사 + 새로운 상품 추가
       found
-        ? items.map((v) => (v.id === id ? { ...v, count: v.count + 1 } : v))
+        ? items.map((v) =>
+            v.productId === productId ? { ...v, count: v.count + 1 } : v
+          )
         : [
             ...items,
             {
@@ -53,6 +55,32 @@ function App() {
       .then((v) => setProducts(v.data));
   }, []);
 
+  const handleOrderSubmit = (order) => {
+    if (items.length === 0) {
+      alert("아이템을 추가해 주세요!");
+    } else {
+      axios
+        .post("http://localhost:8080/api/v1/orders", {
+          email: order.email,
+          address: order.address,
+          postcode: order.postcode,
+          orderItems: items.map((v) => ({
+            productId: v.productId,
+            category: v.category,
+            price: v.price,
+            quantity: v.count,
+          })),
+        })
+        .then(
+          (v) => alert("주문이 정상적으로 접수되었습니다."),
+          (e) => {
+            alert("서버 장애");
+            console.error(e);
+          }
+        );
+    }
+  };
+
   return (
     <body className="container-fluid">
       <div className="row justify-content-center m-4">
@@ -64,7 +92,7 @@ function App() {
             <ProductList products={products} onAddClick={handleAddClicked} />
           </div>
           <div className="col-md-4 summary p-4">
-            <Summary items={items} />
+            <Summary items={items} onOrderSubmit={handleOrderSubmit} />
           </div>
         </div>
       </div>
